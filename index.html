@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        #tic-tac-toe-board {
+            display: grid;
+            grid-template-columns: repeat(3, 80px);
+            grid-gap: 5px;
+            background-color: #ffffff;
+            border: 3px solid blue;
+            padding: 5px;
+        }
+
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 80px;
+            height: 80px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid blue;
+        }
+
+        .cell.X {
+            color: pink;
+        }
+
+        .cell.O {
+            color: orange;
+        }
+
+        #players {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #players input {
+            font-size: 16px;
+            padding: 5px;
+            margin: 5px;
+        }
+
+        #turn {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        #buttons {
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            #tic-tac-toe-board {
+                grid-template-columns: repeat(3, 50px);
+                font-size: 16px;
+            }
+
+            .cell {
+                width: 50px;
+                height: 50px;
+                font-size: 16px;
+            }
+
+            #players input {
+                font-size: 14px;
+                padding: 3px;
+                margin: 3px;
+            }
+        }
+    </style>
+    <title>Tic Tac Toe</title>
+</head>
+<body>
+    <div id="players">
+        <input type="text" id="playerX" placeholder="Enter name for X">
+        <input type="text" id="playerO" placeholder="Enter name for O">
+        <button id="startButton" onclick="startGame()">Start Game</button>
+    </div>
+
+    <div id="turn"></div>
+
+    <div id="tic-tac-toe-board">
+        <div class="cell" onclick="makeMove(this)" data-disabled="true"></div>
+        <div class="cell" onclick="makeMove(this)" data-disabled="true"></div>
+        <div class="cell" onclick="makeMove(this)" data-disabled="true"></div>
+        <div class="cell" onclick="makeMove(this)" data-disabled="true"></div>
+        <div class="cell" onclick="makeMove(this)" data-disabled="true"></div>
+        <div class="cell" onclick="makeMove(this)" data-disabled="true"></div>
+        <div class="cell" onclick="makeMove(this)" data-disabled="true"></div>
+        <div class="cell" onclick="makeMove(this)" data-disabled="true"></div>
+        <div class="cell" onclick="makeMove(this)" data-disabled="true"></div>
+    </div>
+
+    <div id="result"></div>
+
+    <div id="buttons">
+        <button id="restart" style="display: none;" onclick="restartGame()">Restart Game</button>
+    </div>
+
+    <script>
+        let currentPlayer = 'X';
+        let playerXName = 'Player X';
+        let playerOName = 'Player O';
+        let moves = 0;
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let gameEnded = false;
+
+        function startGame() {
+            playerXName = document.getElementById('playerX').value || 'Player X';
+            playerOName = document.getElementById('playerO').value || 'Player O';
+
+            document.getElementById('players').style.display = 'none';
+            document.getElementById('restart').style.display = 'none';
+            document.getElementById('turn').textContent = `${playerXName}'s Turn (X)`;
+            gameEnded = false;
+            resetBoard();
+        }
+
+        function resetBoard() {
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('X', 'O');
+                cell.dataset.disabled = 'true';
+            });
+
+            board = ['', '', '', '', '', '', '', '', ''];
+            moves = 0;
+            currentPlayer = 'X';
+            document.getElementById('result').textContent = '';
+        }
+
+        function makeMove(cell) {
+            if (!gameEnded && cell.dataset.disabled === 'true') {
+                const index = Array.from(cell.parentNode.children).indexOf(cell);
+                cell.textContent = currentPlayer;
+                cell.classList.add(currentPlayer);
+                board[index] = currentPlayer;
+                moves++;
+
+                cell.dataset.disabled = 'false';
+
+                if (checkWinner(currentPlayer)) {
+                    document.getElementById('result').textContent = `${currentPlayer === 'X' ? playerXName : playerOName} wins!`;
+                    gameEnded = true;
+                    document.getElementById('restart').style.display = 'block';
+                } else if (moves === 9) {
+                    document.getElementById('result').textContent = 'It\'s a draw!';
+                    gameEnded = true;
+                    document.getElementById('restart').style.display = 'block';
+                } else {
+                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                    document.getElementById('turn').textContent = `${currentPlayer === 'X' ? playerXName : playerOName}'s Turn (${currentPlayer})`;
+                }
+            }
+        }
+
+        function checkWinner(player) {
+            const winCombos = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+
+            for (const combo of winCombos) {
+                const [a, b, c] = combo;
+                if (board[a] === player && board[b] === player && board[c] === player) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function restartGame() {
+            document.getElementById('restart').style.display = 'none';
+            document.getElementById('players').style.display = 'block';
+            document.getElementById('playerX').value = '';
+            document.getElementById('playerO').value = '';
+            document.getElementById('turn').textContent = '';
+            document.getElementById('result').textContent = '';
+            resetBoard();
+        }
+    </script>
+</body>
+</html>
+
